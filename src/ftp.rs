@@ -3,9 +3,9 @@
 use super::data_stream::DataStream;
 use super::status;
 use super::types::{FileType, FtpError, Line, Result};
-use chrono::{DateTime, Utc, TimeZone};
+use chrono::{DateTime, TimeZone, Utc};
 #[cfg(feature = "secure")]
-use openssl::ssl::{Ssl, SslContext};
+use native_tls::TlsConnector;
 use regex::Regex;
 use std::borrow::Cow;
 #[cfg(feature = "secure")]
@@ -33,7 +33,7 @@ lazy_static! {
 pub struct FtpStream {
     reader: BufReader<DataStream>,
     #[cfg(feature = "secure")]
-    ssl_cfg: Option<SslContext>,
+    ssl_cfg: Option<TlsConnector>,
 }
 
 impl FtpStream {
@@ -86,7 +86,7 @@ impl FtpStream {
     /// let mut ftp_stream = ftp_stream.into_secure(ctx).unwrap();
     /// ```
     #[cfg(feature = "secure")]
-    pub fn into_secure(mut self, ssl_context: SslContext) -> Result<FtpStream> {
+    pub fn into_secure(mut self, ssl_context: TlsConnector) -> Result<FtpStream> {
         // Ask the server to start securing data.
         self.write_str("AUTH TLS\r\n")?;
         self.read_response(status::AUTH_OK)?;
