@@ -91,9 +91,8 @@ impl FtpStream {
         // Ask the server to start securing data.
         self.write_str("AUTH TLS\r\n")?;
         self.read_response(status::AUTH_OK)?;
-        let ssl_cfg =
-            Ssl::new(&ssl_context)
-                .map_err(|e| FtpError::SecureError(e.description().to_owned()))?;
+        let ssl_cfg = Ssl::new(&ssl_context)
+            .map_err(|e| FtpError::SecureError(e.description().to_owned()))?;
         let stream = ssl_cfg
             .connect(self.reader.into_inner().into_tcp_stream())
             .map_err(|e| FtpError::SecureError(e.description().to_owned()))?;
